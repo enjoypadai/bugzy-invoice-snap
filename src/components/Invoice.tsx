@@ -1,9 +1,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Volume2, VolumeX, Settings } from 'lucide-react';
 import { CartItem } from '@/contexts/CartContext';
 import { useState } from 'react';
+import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { toast } from '@/hooks/use-toast';
 
 interface CustomerInfo {
   name: string;
@@ -23,6 +28,16 @@ interface InvoiceProps {
 
 const Invoice = ({ isOpen, onClose, orderNumber, customerInfo, cartItems, total }: InvoiceProps) => {
   const [showWhatsAppAlert, setShowWhatsAppAlert] = useState(false);
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  
+  const voiceMessage = "Please share this invoice screenshot to the number +91 85911 27301 to process your order further.";
+  
+  const { speak, stop, isPlaying, error } = useTextToSpeech({
+    text: voiceMessage,
+    apiKey: apiKey || undefined,
+    voice: "EXAVITQu4vr4xnSDxMaL" // Sarah's voice
+  });
   
   const currentDate = new Date().toLocaleDateString('en-IN');
   const currentTime = new Date().toLocaleTimeString('en-IN');
@@ -34,6 +49,36 @@ const Invoice = ({ isOpen, onClose, orderNumber, customerInfo, cartItems, total 
   const handleFinalClose = () => {
     setShowWhatsAppAlert(false);
     onClose();
+  };
+
+  const handlePrint = () => {
+    window.print();
+    
+    // Play voice message after printing
+    if (apiKey) {
+      setTimeout(() => {
+        speak();
+      }, 1000); // Small delay to ensure print dialog doesn't interfere
+    } else {
+      setShowApiKeyInput(true);
+    }
+  };
+
+  const handleApiKeySubmit = () => {
+    if (apiKey.trim()) {
+      setShowApiKeyInput(false);
+      toast({
+        title: "API Key Saved",
+        description: "Voice feature is now enabled!"
+      });
+      speak();
+    } else {
+      toast({
+        title: "API Key Required",
+        description: "Please enter your ElevenLabs API key",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -132,20 +177,63 @@ const Invoice = ({ isOpen, onClose, orderNumber, customerInfo, cartItems, total 
             </div>
           </div>
 
-          <div className="flex space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={() => window.print()}
-              className="flex-1"
-            >
-              Print Invoice
-            </Button>
-            <Button 
-              onClick={handleClose}
-              className="flex-1 bg-bee-yellow hover:bg-bee-yellow/90 text-bee-black"
-            >
-              Close
-            </Button>
+          <div className="flex flex-col space-y-3">
+            {/* Voice Controls */}
+            <div className="flex items-center justify-center space-x-2 p-2 bg-bee-yellow/10 rounded-lg">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={apiKey ? speak : () => setShowApiKeyInput(true)}
+                disabled={isPlaying}
+                className="flex items-center space-x-2"
+              >
+                {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                <span>{isPlaying ? 'Playing...' : 'Voice Message'}</span>
+              </Button>
+              
+              {apiKey && isPlaying && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={stop}
+                >
+                  Stop
+                </Button>
+              )}
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowApiKeyInput(true)}
+                className="flex items-center space-x-1"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="text-xs">API</span>
+              </Button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex space-x-3">
+              <Button 
+                variant="outline" 
+                onClick={handlePrint}
+                className="flex-1"
+              >
+                Print & Voice
+              </Button>
+              <Button 
+                onClick={handleClose}
+                className="flex-1 bg-bee-yellow hover:bg-bee-yellow/90 text-bee-black"
+              >
+                Close
+              </Button>
+            </div>
+            
+            {error && (
+              <p className="text-xs text-destructive text-center">
+                Voice Error: {error}
+              </p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -182,6 +270,47 @@ const Invoice = ({ isOpen, onClose, orderNumber, customerInfo, cartItems, total 
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* API Key Input Dialog */}
+      <Dialog open={showApiKeyInput} onOpenChange={setShowApiKeyInput}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-bee-black">ElevenLabs API Key</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              <p>To enable voice announcements, please enter your ElevenLabs API key:</p>
+              <p className="mt-2 text-xs">Get your API key from: <span className="font-mono bg-muted px-1 rounded">elevenlabs.io</span></p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="apikey">API Key</Label>
+              <Input
+                id="apikey"
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter your ElevenLabs API key"
+                onKeyDown={(e) => e.key === 'Enter' && handleApiKeySubmit()}
+              />
+            </div>
+            <div className="flex space-x-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowApiKeyInput(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleApiKeySubmit}
+                className="flex-1 bg-bee-yellow hover:bg-bee-yellow/90 text-bee-black"
+              >
+                Save & Play
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
