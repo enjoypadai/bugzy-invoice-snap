@@ -14,7 +14,7 @@ export const products: Product[] = [
   // Male Shirts
   {
     id: 'ms1',
-    name: 'Classic Cotton Shirt - Blue',
+    name: 'Classic Cotton Shirt trail - Blue',
     price: 1299,
     image: 'https://images.unsplash.com/photo-1602810319428-019690571b5b?w=500',
     category: 'male',
