@@ -7,9 +7,9 @@ import NotificationBanner from '@/components/NotificationBanner';
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
-      <NotificationBanner />
       <Header />
       <Hero />
+      <NotificationBanner />
       <ProductSection category="male" title="Men's Collection" id="male" />
       <ProductSection category="female" title="Women's Collection" id="female" />
       <ProductSection category="professional" title="Professional Wear" id="professional" />

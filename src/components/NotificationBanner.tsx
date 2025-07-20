@@ -55,7 +55,7 @@ const NotificationBanner = () => {
   }
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-secondary to-bee-black text-secondary-foreground">
+    <div className="relative overflow-hidden bg-gradient-to-r from-muted/50 to-muted text-foreground">
       <Alert className="border-0 bg-transparent rounded-none relative">
         <div className="flex items-center justify-between w-full">
           <div className="flex-1 overflow-hidden">
