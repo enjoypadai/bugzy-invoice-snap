@@ -1,4 +1,5 @@
 import { ShoppingCart, Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -14,6 +15,7 @@ const Header = () => {
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
 
   const navigation = [
+    { name: 'Labs', href: '/labs' },
     { name: 'Male', href: '#male' },
     { name: 'Female', href: '#female' },
     { name: 'Professional', href: '#professional' },
@@ -40,13 +42,23 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="text-foreground hover:text-bee-yellow transition-colors font-medium"
-              >
-                {item.name}
-              </a>
+              item.href.startsWith('/') ? (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="text-foreground hover:text-bee-yellow transition-colors font-medium"
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="text-foreground hover:text-bee-yellow transition-colors font-medium"
+                >
+                  {item.name}
+                </a>
+              )
             ))}
           </nav>
 
@@ -79,14 +91,25 @@ const Header = () => {
               <SheetContent side="right" className="w-64">
                 <nav className="flex flex-col space-y-4 mt-6">
                   {navigation.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="text-foreground hover:text-bee-yellow transition-colors font-medium py-2"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {item.name}
-                    </a>
+                    item.href.startsWith('/') ? (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className="text-foreground hover:text-bee-yellow transition-colors font-medium py-2"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    ) : (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        className="text-foreground hover:text-bee-yellow transition-colors font-medium py-2"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {item.name}
+                      </a>
+                    )
                   ))}
                 </nav>
               </SheetContent>
