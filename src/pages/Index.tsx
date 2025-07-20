@@ -2,10 +2,12 @@ import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import ProductSection from '@/components/ProductSection';
 import Footer from '@/components/Footer';
+import NotificationBanner from '@/components/NotificationBanner';
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      <NotificationBanner />
       <Header />
       <Hero />
       <ProductSection category="male" title="Men's Collection" id="male" />
